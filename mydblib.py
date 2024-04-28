@@ -3,12 +3,13 @@ import sys
 import config
 
 
-def my_update( sql_string):
+def my_update(db, sql_string):
     try:
         dbcon = mydb.connect(
             host=config.HOST,
             user=config.USER,
             password=config.PASSWORD,
+            database=db
         )
         cursor = dbcon.cursor(dictionary=True)
     except mydb.Error as e:
