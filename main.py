@@ -1,8 +1,9 @@
 import discord
 import re
 import datetime
+import config
 
-TOKEN="MTE2MjM2ODgyNTgyODg0MzU4MQ.GERouF.uswQTOcwMgqZsdlhvnfdJzhsLTsd_w4FHl-zO0"
+TOKEN=config.TOKEN
 
 intents = discord.Intents.default()
 intents.message_content = True
@@ -14,14 +15,26 @@ intents.guilds = True
 client = discord.Client(intents=intents)
 
 async def register_task(message:discord.Message):
-    this_year = datetime.date.today().year
-    date_str = re.findall(r"\d\d?/\d\d?\s\d\d?:\d\d", message.content)[0]
-    date = datetime.datetime.strptime(
-        f"{this_year}/"+date_str, "%Y/%m/%d %H:%M")
-    channel_id = message.channel.id
-    channel = message.channel
-    print(channel)
-    print(channel_id)
+    try:
+        thread_id = message.channel.id
+        message_id = message.id
+        
+        today=datetime.date.today()
+        year = today.year
+        date_str = re.findall(r"\d\d?/\d\d?\s\d\d?:\d\d", message.content)[0]
+        temp_date=datetime.datetime.strptime(date_str,"%m/%d %H:%M")
+        if today.month>temp_date.month:
+            year+=1
+        date_str = re.findall(r"\d\d?/\d\d?\s\d\d?:\d\d", message.content)[0]
+        date = datetime.datetime.strptime(
+            f"{year}/"+date_str, "%Y/%m/%d %H:%M")
+        
+        
+        
+    except Exception as e:
+        print(e) 
+    
+    
 
 @client.event
 async def on_ready():
