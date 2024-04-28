@@ -15,15 +15,15 @@
 # 【データベース仕様】
 
 - １．課題管理テーブル
-  | message_id | channel_id | thread_id | deadline |
-  | BIGINT, PK | BIGINT, NN | BIGINT | DATE,NN |
+  | message_id | thread_id | deadline |
+  | BIGINT, PK, NN | BIGINT, NN | DATE,NN |
 
   - 登録された課題のうち、期限が過ぎていない課題のみを保存する
   - 期限が過ぎた課題は削除する
 
 - ２．スレッドメンバ管理テーブル
   | id | thread_id | member_id | created_date |
-  | AU,PK,INT | BIGINT,BIGINT | BIGINT,BIGINT | DATE |
+  | INT,AU,PK,NN | BIGINT,NN | BIGINT,NN | DATE |
 
   - 各スレッドに属している人が保存される
   - スレッドに新しく入った人がいたら更新する
