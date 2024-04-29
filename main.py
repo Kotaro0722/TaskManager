@@ -2,7 +2,9 @@ import discord
 import re
 import datetime
 import config
+from discord.ext import tasks
 from mydblib import my_update
+from mydblib2 import my_select
 
 TOKEN=config.TOKEN
 
@@ -41,6 +43,14 @@ async def register_task(message:discord.Message):
     except Exception as e:
         print(e) 
     
+@tasks.loop(seconds=60)
+async def loop():
+    now=datetime.datetime.now()
+    sql_select_task=f"""
+        SELECT * FROM {task_table}
+    """
+    task_list=my_select(dbName,sql_select_task)
+    print(task_list)
     
 
 @client.event
