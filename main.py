@@ -36,6 +36,8 @@ async def register_task(message:discord.Message):
         sql_insert_data=f"INSERT INTO {task_table}(message_id,thread_id,deadline) VALUES({message_id},{thread_id},'{date}')"
         my_update(dbName,sql_insert_data)
         
+        await message.add_reaction("⭕")
+        
     except Exception as e:
         print(e) 
     
@@ -47,9 +49,10 @@ async def on_ready():
     
 @client.event
 async def on_message(message:discord.Message):
-    pattern_task_register = r"【.*】\s*\[\d\d\/\d\d\s\d\d\:\d\d]"
+    pattern_task_register = r"【.*】\s*\[\d\d?\/\d\d?\s\d\d?:\d\d?]"
     is_task_register = re.fullmatch(pattern_task_register, message.content)
     if is_task_register:
+        print("reg pass")
         await register_task(message)
     
 @client.event

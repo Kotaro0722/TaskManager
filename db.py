@@ -15,6 +15,8 @@ sql_create_table=f"""
          deadline DATETIME NOT NULL,
          PRIMARY KEY (message_id)     
     );"""
+sql_select_table=f"SELECT * FROM {task_table};"
+sql_show_table="SHOW TABLES;"
 
 
-my_update(dbname,sql_create_table)
+my_update(dbname,sql_show_table)
