@@ -52,6 +52,7 @@ async def on_message(message:discord.Message):
     pattern_task_register = r"【.*】\s*\[\d?\/\d?\s\d?\:\d?]"
     is_task_register = re.fullmatch(pattern_task_register, message.content)
     if is_task_register:
+        print("reg pass")
         await register_task(message)
     
 @client.event
