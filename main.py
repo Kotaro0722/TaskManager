@@ -49,7 +49,7 @@ async def on_ready():
     
 @client.event
 async def on_message(message:discord.Message):
-    pattern_task_register = r"【.*】\s*\[\d\d\/\d\d\s\d\d\:\d\d]"
+    pattern_task_register = r"【.*】\s*\[\d?\/\d?\s\d?\:\d?]"
     is_task_register = re.fullmatch(pattern_task_register, message.content)
     if is_task_register:
         await register_task(message)
