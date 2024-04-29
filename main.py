@@ -2,6 +2,7 @@ import discord
 import re
 import datetime
 import config
+import pandas
 from discord.ext import tasks
 from mydblib import my_update
 from mydblib2 import my_select
@@ -43,19 +44,58 @@ async def register_task(message:discord.Message):
     except Exception as e:
         print(e) 
     
-@tasks.loop(seconds=60)
+def select_tomorrow_task(list:pandas.DataFrame):
+    today=datetime.datetime.today()
+    year=today.year
+    month=today.month
+    day=today.day
+    hour=today.hour
+    minute=today.minute
+    today=datetime.datetime(year,month,day,hour,minute)
+    tomorrow=today+datetime.timedelta(days=1)
+    
+    ans=[]
+    
+    if list["deadline"].to_pydatetime()==tomorrow:
+        ans.append(list)
+    return ans
+
+def select_thirty_minutes_later_task(list:pandas.DataFrame):
+    today=datetime.datetime.today()
+    year=today.year
+    month=today.month
+    day=today.day
+    hour=today.hour
+    minute=today.minute
+    today=datetime.datetime(year,month,day,hour,minute)
+    thirty_minutes_later=today+datetime.timedelta(minutes=30)
+    
+    ans=[]
+
+    if list["deadline"].to_pydatetime()==thirty_minutes_later:
+        ans.append(list)
+    return ans
+
+@tasks.loop(seconds=5)
 async def loop():
-    now=datetime.datetime.now()
     sql_select_task=f"""
         SELECT * FROM {task_table}
     """
     task_list=my_select(dbName,sql_select_task)
-    print(task_list)
+    tomorrow_task=task_list.apply(select_tomorrow_task,axis=1)
+    cleaned_tomorrow_task=tomorrow_task[tomorrow_task.apply(lambda x:x !=[])]
+    thirty_minutes_later_task=task_list.apply(select_thirty_minutes_later_task,axis=1)
+    cleaned_thirty_minutes_later_task=thirty_minutes_later_task[thirty_minutes_later_task.apply(lambda x:x !=[])]
+    print(cleaned_tomorrow_task)
+    print(cleaned_thirty_minutes_later_task)
+    
     
 
 @client.event
 async def on_ready():
     print(f'We have logged in as {client.user}')
+    await loop.start()
+    
     
 @client.event
 async def on_message(message:discord.Message):
@@ -68,6 +108,5 @@ async def on_message(message:discord.Message):
 @client.event
 async def on_raw_message_edit(payload:discord.RawMessageUpdateEvent):
     print(payload.data["content"])
-
 
 client.run(token=TOKEN)
