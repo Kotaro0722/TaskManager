@@ -3,6 +3,7 @@ import re
 import datetime
 import config
 import pandas
+import asyncio
 from discord.ext import tasks
 from mydblib import my_update
 from mydblib2 import my_select
@@ -76,6 +77,19 @@ def select_thirty_minutes_later_task(list:pandas.DataFrame):
         ans.append(list)
     return ans
 
+async def remind(data:pandas.Series):
+    for element in data:
+        # print(element)
+        thread=client.get_channel(element[0]["thread_id"])
+        # print(type(thread))
+        join_members=await thread.fetch_members()
+        
+        message=await thread.fetch_message(element[0]["message_id"])
+        # submit_members=message.reactions.users().flatten()
+        
+        print(join_members)
+        print(message)
+
 @tasks.loop(seconds=5)
 async def loop():
     sql_select_task=f"""
@@ -84,10 +98,13 @@ async def loop():
     task_list=my_select(dbName,sql_select_task)
     tomorrow_task=task_list.apply(select_tomorrow_task,axis=1)
     cleaned_tomorrow_task=tomorrow_task[tomorrow_task.apply(lambda x:x !=[])]
-    thirty_minutes_later_task=task_list.apply(select_thirty_minutes_later_task,axis=1)
-    cleaned_thirty_minutes_later_task=thirty_minutes_later_task[thirty_minutes_later_task.apply(lambda x:x !=[])]
-    print(cleaned_tomorrow_task)
-    print(cleaned_thirty_minutes_later_task)
+    # thirty_minutes_later_task=task_list.apply(select_thirty_minutes_later_task,axis=1)
+    # cleaned_thirty_minutes_later_task=thirty_minutes_later_task[thirty_minutes_later_task.apply(lambda x:x !=[])]
+    # print(cleaned_tomorrow_task)
+    # print(cleaned_thirty_minutes_later_task)
+    # print(type(cleaned_tomorrow_task))
+    await remind(cleaned_tomorrow_task)
+    
     
     
 
