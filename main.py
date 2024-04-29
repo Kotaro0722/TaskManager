@@ -1,6 +1,6 @@
 import discord
 import re
-import datetime
+from datetime import datetime,timedelta
 import config
 from mydblib import my_update
 
@@ -31,7 +31,7 @@ async def register_task(message:discord.Message):
             year+=1
         date_str = re.findall(r"\d\d?/\d\d?\s\d\d?:\d\d", message.content)[0]
         date = datetime.datetime.strptime(
-            f"{year}/"+date_str, "%Y/%m/%d %H:%M")
+            f"{year}/"+date_str, "%Y/%m/%d %H:%M")-timedelta(hours=9)
         
         sql_insert_data=f"INSERT INTO {task_table}(message_id,thread_id,deadline) VALUES({message_id},{thread_id},'{date}')"
         my_update(dbName,sql_insert_data)
