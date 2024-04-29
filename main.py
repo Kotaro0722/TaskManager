@@ -36,6 +36,8 @@ async def register_task(message:discord.Message):
         sql_insert_data=f"INSERT INTO {task_table}(message_id,thread_id,deadline) VALUES({message_id},{thread_id},'{date}')"
         my_update(dbName,sql_insert_data)
         
+        await message.add_reaction("⭕")
+        
     except Exception as e:
         print(e) 
     
