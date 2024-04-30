@@ -88,7 +88,6 @@ def gene_mention(member_list):
         mention_str=""
         for member in member_list:
             mention_str+=f"<@{member}> "
-        mention_str+="課題を出し忘れていませんか？"
         return mention_str
     else:
         return None
@@ -110,7 +109,7 @@ async def remind(data:pandas.Series):
         
         mention=gene_mention(unSubmit_members_id)
         if mention:
-            await thread.send(content=mention)
+            await thread.send(content=mention+f"[課題](<https://discord.com/channels/{guild.id}/{element[0]["thread_id"]}/{element[0]["message_id"]}>)を出し忘れていませんか？")
 
 @tasks.loop(seconds=60)
 async def loop():
@@ -165,3 +164,4 @@ async def on_raw_message_edit(payload:discord.RawMessageUpdateEvent):
     print(payload.data["content"])
 
 client.run(token=TOKEN)
+
