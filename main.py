@@ -83,6 +83,14 @@ def get_thread_member_id(members:discord.ThreadMember):
         id_list.append(member.id)
     return id_list
 
+async def reject_bot_id(guild:discord.Guild,list):
+    member_list=[]
+    for user_id in list:
+          user:discord.Member=await guild.fetch_member(user_id)
+          if not user.bot:
+              member_list.append(user_id)
+    return member_list
+
 async def get_submit_member_id(message:discord.Message):
     reaction_users = []
     for reaction in message.reactions:
@@ -92,17 +100,29 @@ async def get_submit_member_id(message:discord.Message):
                     reaction_users.append(user.id)
     return reaction_users
 
+def get_guild(guild_list,thread_id):
+    access_guild=None
+    for guild in guild_list:
+        if guild.get_channel_or_thread(thread_id):
+            access_guild=guild
+    return access_guild
+
 async def remind(data:pandas.Series):
     for element in data:
+        guild=get_guild(client.guilds,element[0]["thread_id"])
+        
         thread=client.get_channel(element[0]["thread_id"])
         join_members=await thread.fetch_members()
+        join_members_id=get_thread_member_id(join_members)
+        class_members_id=await reject_bot_id(guild,join_members_id)
         
         message=await thread.fetch_message(element[0]["message_id"])
-        submit_members=await get_submit_member_id(message)
+        submit_members_id=await get_submit_member_id(message)
         
-        join_members_id=get_thread_member_id(join_members)
-        print(join_members_id)
-        print(submit_members)
+        unSubmit_members_id=list(set(class_members_id)-set(submit_members_id))
+        print(unSubmit_members_id)
+        # print(join_members_id)
+        # print(submit_members)
 
 @tasks.loop(seconds=5)
 async def loop():
@@ -117,9 +137,6 @@ async def loop():
     await remind(cleaned_tomorrow_task)
     await remind(cleaned_thirty_minutes_later_task)
     
-    
-    
-
 @client.event
 async def on_ready():
     print(f'We have logged in as {client.user}')
