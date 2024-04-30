@@ -77,18 +77,32 @@ def select_thirty_minutes_later_task(list:pandas.DataFrame):
         ans.append(list)
     return ans
 
+def get_thread_member_id(members:discord.ThreadMember):
+    id_list=[]
+    for member in members:
+        id_list.append(member.id)
+    return id_list
+
+async def get_submit_member_id(message:discord.Message):
+    reaction_users = []
+    for reaction in message.reactions:
+        if reaction.emoji=="✅":
+            async for user in reaction.users():
+                if user not in reaction_users:
+                    reaction_users.append(user.id)
+    return reaction_users
+
 async def remind(data:pandas.Series):
     for element in data:
-        # print(element)
         thread=client.get_channel(element[0]["thread_id"])
-        # print(type(thread))
         join_members=await thread.fetch_members()
         
         message=await thread.fetch_message(element[0]["message_id"])
-        # submit_members=message.reactions.users().flatten()
+        submit_members=await get_submit_member_id(message)
         
-        print(join_members)
-        print(message)
+        join_members_id=get_thread_member_id(join_members)
+        print(join_members_id)
+        print(submit_members)
 
 @tasks.loop(seconds=5)
 async def loop():
@@ -98,12 +112,10 @@ async def loop():
     task_list=my_select(dbName,sql_select_task)
     tomorrow_task=task_list.apply(select_tomorrow_task,axis=1)
     cleaned_tomorrow_task=tomorrow_task[tomorrow_task.apply(lambda x:x !=[])]
-    # thirty_minutes_later_task=task_list.apply(select_thirty_minutes_later_task,axis=1)
-    # cleaned_thirty_minutes_later_task=thirty_minutes_later_task[thirty_minutes_later_task.apply(lambda x:x !=[])]
-    # print(cleaned_tomorrow_task)
-    # print(cleaned_thirty_minutes_later_task)
-    # print(type(cleaned_tomorrow_task))
+    thirty_minutes_later_task=task_list.apply(select_thirty_minutes_later_task,axis=1)
+    cleaned_thirty_minutes_later_task=thirty_minutes_later_task[thirty_minutes_later_task.apply(lambda x:x !=[])]
     await remind(cleaned_tomorrow_task)
+    await remind(cleaned_thirty_minutes_later_task)
     
     
     
