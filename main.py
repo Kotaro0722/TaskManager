@@ -112,7 +112,7 @@ async def remind(data:pandas.Series):
         if mention:
             await thread.send(content=mention)
 
-@tasks.loop(seconds=5)
+@tasks.loop(seconds=60)
 async def loop():
     sql_select_task=f"""
         SELECT * FROM {task_table}
