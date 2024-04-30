@@ -105,13 +105,12 @@ async def remind(data:pandas.Series):
         submit_members_id=await get_submit_member_id(message)
         
         unSubmit_members_id=list(set(class_members_id)-set(submit_members_id))
-        print(unSubmit_members_id)
         
         mention=gene_mention(unSubmit_members_id)
         if mention:
-            await thread.send(content=mention+f"[課題](<https://discord.com/channels/{guild.id}/{element[0]["thread_id"]}/{element[0]["message_id"]}>)を出し忘れていませんか？")
+            await thread.send(content=mention+f"[課題](<https://discord.com/channels/{guild.id}/{thread.id}/{message.id}>)を出し忘れていませんか？")
 
-@tasks.loop(seconds=60)
+@tasks.loop(seconds=1)
 async def loop():
     sql_select_task=f"""
         SELECT * FROM {task_table}
