@@ -107,6 +107,16 @@ def get_guild(guild_list,thread_id):
             access_guild=guild
     return access_guild
 
+def gene_mention(member_list):
+    if len(member_list)>0:
+        mention_str=""
+        for member in member_list:
+            mention_str+=f"<@{member}> "
+        mention_str+="課題を出し忘れていませんか？"
+        return mention_str
+    else:
+        return None
+
 async def remind(data:pandas.Series):
     for element in data:
         guild=get_guild(client.guilds,element[0]["thread_id"])
@@ -121,8 +131,10 @@ async def remind(data:pandas.Series):
         
         unSubmit_members_id=list(set(class_members_id)-set(submit_members_id))
         print(unSubmit_members_id)
-        # print(join_members_id)
-        # print(submit_members)
+        
+        mention=gene_mention(unSubmit_members_id)
+        if mention:
+            await thread.send(content=mention)
 
 @tasks.loop(seconds=5)
 async def loop():
