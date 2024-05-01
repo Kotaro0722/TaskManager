@@ -124,7 +124,7 @@ async def loop():
     await remind(cleaned_thirty_minutes_later_task)
      
     today=datetime.datetime.today()
-    sql_delete_done_task=f"""DELETE FROM {task_list} WHERE deadline>'{today}'"""
+    sql_delete_done_task=f"""DELETE FROM {task_list} WHERE deadline<'{today}'"""
     my_update(sql_delete_done_task)
     
 @client.event
