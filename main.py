@@ -110,18 +110,24 @@ async def remind(data:pandas.Series):
         if mention:
             await thread.send(content=mention+f"[課題](<https://discord.com/channels/{guild.id}/{thread.id}/{message.id}>)を出し忘れていませんか？")
 
-@tasks.loop(seconds=1)
+@tasks.loop(seconds=60)
 async def loop():
     sql_select_task=f"""
         SELECT * FROM {task_table}
     """
     task_list=my_select(dbName,sql_select_task)
+    
     tomorrow_task=task_list.apply(select_tomorrow_task,axis=1)
     cleaned_tomorrow_task=tomorrow_task[tomorrow_task.apply(lambda x:x !=[])]
+    await remind(cleaned_tomorrow_task)
+    
     thirty_minutes_later_task=task_list.apply(select_thirty_minutes_later_task,axis=1)
     cleaned_thirty_minutes_later_task=thirty_minutes_later_task[thirty_minutes_later_task.apply(lambda x:x !=[])]
-    await remind(cleaned_tomorrow_task)
     await remind(cleaned_thirty_minutes_later_task)
+     
+    today=datetime.datetime.today()
+    sql_delete_done_task=f"""DELETE FROM {task_table} WHERE deadline<'{today}'"""
+    my_update(dbName,sql_delete_done_task)
     
 @client.event
 async def on_ready():
