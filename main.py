@@ -116,12 +116,13 @@ async def loop():
         SELECT * FROM {task_table}
     """
     task_list=my_select(dbName,sql_select_task)
+    
     tomorrow_task=task_list.apply(select_tomorrow_task,axis=1)
     cleaned_tomorrow_task=tomorrow_task[tomorrow_task.apply(lambda x:x !=[])]
+    await remind(cleaned_tomorrow_task)
+    
     thirty_minutes_later_task=task_list.apply(select_thirty_minutes_later_task,axis=1)
     cleaned_thirty_minutes_later_task=thirty_minutes_later_task[thirty_minutes_later_task.apply(lambda x:x !=[])]
-    print(cleaned_tomorrow_task)
-    await remind(cleaned_tomorrow_task)
     await remind(cleaned_thirty_minutes_later_task)
      
     today=datetime.datetime.today()
