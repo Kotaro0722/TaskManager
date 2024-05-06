@@ -113,9 +113,10 @@ async def remind(data:pandas.Series):
 @tasks.loop(seconds=60)
 async def loop():
     sql_select_task=f"""
-        SELECT * FROM {task_table}
+        SELECT * FROM {task_table};
     """
     task_list=my_select(dbName,sql_select_task)
+    print(task_list)
     
     tomorrow_task=task_list.apply(select_tomorrow_task,axis=1)
     cleaned_tomorrow_task=tomorrow_task[tomorrow_task.apply(lambda x:x !=[])]
