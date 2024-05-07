@@ -113,7 +113,7 @@ async def remind(data:pandas.Series):
 @tasks.loop(seconds=60)
 async def loop():
     sql_select_task=f"""
-        SELECT * FROM {task_table}
+        SELECT * FROM {task_table};
     """
     task_list=my_select(dbName,sql_select_task)
     
