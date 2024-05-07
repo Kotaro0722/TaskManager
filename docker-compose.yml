@@ -12,4 +12,4 @@ services:
       MARIADB_ROOT_PASSWORD: pass
     volumes:
       - ./volume:/var/lib/mysql
-      - ./initdb.d:docker-entrypoint-initdb.d
+      - /home/kotaro/TaskManager/initdb.d:/docker-entrypoint-initdb.d:rw
