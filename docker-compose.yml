@@ -10,6 +10,7 @@ services:
     environment:
       MARIADB_DATABASE: task_manager
       MARIADB_ROOT_PASSWORD: pass
+      TZ: Asia/Tokyo
     volumes:
       - ./volume:/var/lib/mysql
       - /home/kotaro/TaskManager/initdb.d:/docker-entrypoint-initdb.d:rw
