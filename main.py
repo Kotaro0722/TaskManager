@@ -166,9 +166,9 @@ async def on_message(message:discord.Message):
     if is_task_register:
         await register_task(message)
     
-@client.event
-async def on_raw_message_edit(payload:discord.RawMessageUpdateEvent):
-    print(payload.data["content"])
+# @client.event
+# async def on_raw_message_edit(payload:discord.RawMessageUpdateEvent):
+#     print(payload.data["content"])
 
 client.run(token=TOKEN)
 
