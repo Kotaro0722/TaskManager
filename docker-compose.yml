@@ -3,8 +3,6 @@ services:
   app:
     build: .
     restart: always
-    environment:
-      TZ: Asia/Tokyo
     depends_on:
       - "db"
   db:
