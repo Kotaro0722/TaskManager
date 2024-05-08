@@ -33,7 +33,7 @@ def select_tomorrow_task(list:pandas.DataFrame):
     
     ans=[]
     
-    if list["deadline"].to_pydatetime()==tomorrow:
+    if pandas.to_datetime(list["deadline"])==tomorrow:
         ans.append(list)
     return ans
 
@@ -49,7 +49,7 @@ def select_thirty_minutes_later_task(list:pandas.DataFrame):
     
     ans=[]
 
-    if list["deadline"].to_pydatetime()==thirty_minutes_later:
+    if pandas.to_datetime(list["deadline"])==thirty_minutes_later:
         ans.append(list)
     return ans
 
@@ -131,10 +131,12 @@ async def loop():
     sql_delete_done_task=f"""DELETE FROM {task_table} WHERE deadline<'{today}'"""
     my_update(dbName,sql_delete_done_task)
     
+    print(today)
+    
 @client.event
 async def on_ready():
     print(f'We have logged in as {client.user}')
-    await loop.start()
+    loop.start()
 
 async def register_task(message:discord.Message):
     try:
