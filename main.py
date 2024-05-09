@@ -96,7 +96,7 @@ async def remind(data:pandas.Series):
     for element in data:
         guild=get_guild(client.guilds,element[0]["thread_id"])
         
-        thread=client.get_channel(element[0]["thread_id"])
+        thread=await client.fetch_channel(element[0]["thread_id"])
         join_members=await thread.fetch_members()
         join_members_id=get_thread_member_id(join_members)
         class_members_id=await reject_bot_id(guild,join_members_id)
@@ -110,28 +110,34 @@ async def remind(data:pandas.Series):
         if mention:
             await thread.send(content=mention+f"[課題](<https://discord.com/channels/{guild.id}/{thread.id}/{message.id}>)を出し忘れていませんか？")
 
-@tasks.loop(seconds=60)
+@tasks.loop(seconds=1)
 async def loop():
-    sql_select_task=f"""
-        SELECT * FROM {task_table};
-    """
-    task_list=my_select(dbName,sql_select_task)
-    print("call")
+    print(config.HOST)
+    print(config.PORT)
+    print(config.PASSWORD)
+    print(config.DBNAME)
+    # guild=await client.fetch_guild("1029380284677894164")
+    # channel=await guild.fetch_channel("1234161640598147145")
+    # now=datetime.datetime.now()
+    # await channel.send(now)
+    # sql_select_task=f"""
+    #     SELECT * FROM {task_table};
+    # """
+    # task_list=my_select(dbName,sql_select_task)
     
-    tomorrow_task=task_list.apply(select_tomorrow_task,axis=1)
-    cleaned_tomorrow_task=tomorrow_task[tomorrow_task.apply(lambda x:x !=[])]
-    await remind(cleaned_tomorrow_task)
-    print(cleaned_tomorrow_task)
+    # tomorrow_task=task_list.apply(select_tomorrow_task,axis=1)
+    # cleaned_tomorrow_task=tomorrow_task[tomorrow_task.apply(lambda x:x !=[])]
+    # await remind(cleaned_tomorrow_task)
+    # print(cleaned_tomorrow_task)
     
-    thirty_minutes_later_task=task_list.apply(select_thirty_minutes_later_task,axis=1)
-    cleaned_thirty_minutes_later_task=thirty_minutes_later_task[thirty_minutes_later_task.apply(lambda x:x !=[])]
-    await remind(cleaned_thirty_minutes_later_task)
+    # thirty_minutes_later_task=task_list.apply(select_thirty_minutes_later_task,axis=1)
+    # cleaned_thirty_minutes_later_task=thirty_minutes_later_task[thirty_minutes_later_task.apply(lambda x:x !=[])]
+    # await remind(cleaned_thirty_minutes_later_task)
      
-    today=datetime.datetime.today()
-    sql_delete_done_task=f"""DELETE FROM {task_table} WHERE deadline<'{today}'"""
-    my_update(dbName,sql_delete_done_task)
+    # today=datetime.datetime.today()
+    # sql_delete_done_task=f"""DELETE FROM {task_table} WHERE deadline<'{today}'"""
+    # my_update(dbName,sql_delete_done_task)
     
-    print(today)
     
 @client.event
 async def on_ready():
