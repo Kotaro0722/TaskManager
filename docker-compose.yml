@@ -8,11 +8,11 @@ services:
     depends_on:
       - "db"
   db:
-    image: mariadb:11.3.2
+    image: mysql:latest
     environment:
-      MARIADB_DATABASE: task_manager
-      MARIADB_ROOT_PASSWORD: pass
+      MYSQL_DATABASE: task_manager
+      MYSQL_ROOT_PASSWORD: pass
       TZ: Asia/Tokyo
     volumes:
       - ./volume:/var/lib/mysql
-      - C:\Users\suwau\OneDrive\デスクトップ\Tool\Bot\TaskManager\initdb.d:/docker-entrypoint-initdb.d
+      - /home/kotaro/TaskManager/initdb.d:/docker-entrypoint-initdb.d
