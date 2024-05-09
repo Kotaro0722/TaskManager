@@ -8,10 +8,10 @@ services:
     depends_on:
       - "db"
   db:
-    image: mysql:latest
+    image: mariadb:11.3.2
     environment:
-      MYSQL_DATABASE: task_manager
-      MYSQL_ROOT_PASSWORD: pass
+      MARIADB_DATABASE: task_manager
+      MARIADB_ROOT_PASSWORD: pass
       TZ: Asia/Tokyo
     volumes:
       - ./volume:/var/lib/mysql
