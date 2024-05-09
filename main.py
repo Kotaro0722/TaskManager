@@ -33,7 +33,7 @@ def select_tomorrow_task(list:pandas.DataFrame):
     
     ans=[]
     
-    if list["deadline"].to_pydatetime()==tomorrow:
+    if pandas.to_datetime(list["deadline"])==tomorrow:
         ans.append(list)
     return ans
 
@@ -49,7 +49,7 @@ def select_thirty_minutes_later_task(list:pandas.DataFrame):
     
     ans=[]
 
-    if list["deadline"].to_pydatetime()==thirty_minutes_later:
+    if pandas.to_datetime(list["deadline"])==thirty_minutes_later:
         ans.append(list)
     return ans
 
@@ -95,8 +95,7 @@ def gene_mention(member_list):
 async def remind(data:pandas.Series):
     for element in data:
         guild=get_guild(client.guilds,element[0]["thread_id"])
-        
-        thread=client.get_channel(element[0]["thread_id"])
+        thread=await client.fetch_channel(element[0]["thread_id"])
         join_members=await thread.fetch_members()
         join_members_id=get_thread_member_id(join_members)
         class_members_id=await reject_bot_id(guild,join_members_id)
@@ -116,12 +115,11 @@ async def loop():
         SELECT * FROM {task_table};
     """
     task_list=my_select(dbName,sql_select_task)
-    print("call")
     
     tomorrow_task=task_list.apply(select_tomorrow_task,axis=1)
+    # await thread.send(cleaned_tomorrow_task)
     cleaned_tomorrow_task=tomorrow_task[tomorrow_task.apply(lambda x:x !=[])]
     await remind(cleaned_tomorrow_task)
-    print(cleaned_tomorrow_task)
     
     thirty_minutes_later_task=task_list.apply(select_thirty_minutes_later_task,axis=1)
     cleaned_thirty_minutes_later_task=thirty_minutes_later_task[thirty_minutes_later_task.apply(lambda x:x !=[])]
@@ -131,10 +129,11 @@ async def loop():
     sql_delete_done_task=f"""DELETE FROM {task_table} WHERE deadline<'{today}'"""
     my_update(dbName,sql_delete_done_task)
     
+    
 @client.event
 async def on_ready():
     print(f'We have logged in as {client.user}')
-    await loop.start()
+    loop.start()
 
 async def register_task(message:discord.Message):
     try:
