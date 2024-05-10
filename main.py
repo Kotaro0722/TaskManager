@@ -21,7 +21,7 @@ client = discord.Client(intents=intents)
 dbName=config.DBNAME
 task_table=config.TASK_TABLE
     
-def select_tomorrow_task(list:pandas.DataFrame):
+def select_first_time_task(list:pandas.DataFrame):
     today=datetime.datetime.today()
     year=today.year
     month=today.month
@@ -31,13 +31,10 @@ def select_tomorrow_task(list:pandas.DataFrame):
     today=datetime.datetime(year,month,day,hour,minute)
     tomorrow=today+datetime.timedelta(days=1)
     
-    ans=[]
-    
-    if pandas.to_datetime(list["deadline"])==tomorrow:
-        ans.append(list)
-    return ans
+    tomorrow_task=list[pandas.to_datetime(list["deadline"])==tomorrow]
+    return tomorrow_task
 
-def select_thirty_minutes_later_task(list:pandas.DataFrame):
+def select_second_time_task(list:pandas.DataFrame):
     today=datetime.datetime.today()
     year=today.year
     month=today.month
@@ -45,13 +42,10 @@ def select_thirty_minutes_later_task(list:pandas.DataFrame):
     hour=today.hour
     minute=today.minute
     today=datetime.datetime(year,month,day,hour,minute)
-    thirty_minutes_later=today+datetime.timedelta(minutes=30)
+    tomorrow=today+datetime.timedelta(hours=1)
     
-    ans=[]
-
-    if pandas.to_datetime(list["deadline"])==thirty_minutes_later:
-        ans.append(list)
-    return ans
+    tomorrow_task=list[pandas.to_datetime(list["deadline"])==tomorrow]
+    return tomorrow_task
 
 def get_thread_member_id(members:discord.ThreadMember):
     id_list=[]
@@ -92,15 +86,15 @@ def gene_mention(member_list):
     else:
         return None
 
-async def remind(data:pandas.Series):
-    for element in data:
-        guild=get_guild(client.guilds,element[0]["thread_id"])
-        thread=await client.fetch_channel(element[0]["thread_id"])
+async def remind(data:pandas.DataFrame):
+    for element in data.iterrows():
+        guild=get_guild(client.guilds,element[1]["thread_id"])
+        thread=await client.fetch_channel(element[1]["thread_id"])
         join_members=await thread.fetch_members()
         join_members_id=get_thread_member_id(join_members)
         class_members_id=await reject_bot_id(guild,join_members_id)
         
-        message=await thread.fetch_message(element[0]["message_id"])
+        message=await thread.fetch_message(element[1]["message_id"])
         submit_members_id=await get_submit_member_id(message)
         
         unSubmit_members_id=list(set(class_members_id)-set(submit_members_id))
@@ -109,21 +103,18 @@ async def remind(data:pandas.Series):
         if mention:
             await thread.send(content=mention+f"[課題](<https://discord.com/channels/{guild.id}/{thread.id}/{message.id}>)を出し忘れていませんか？")
 
-@tasks.loop(seconds=60)
+@tasks.loop(seconds=1)
 async def loop():
     sql_select_task=f"""
         SELECT * FROM {task_table};
     """
     task_list=my_select(dbName,sql_select_task)
+        
+    tomorrow_task=select_first_time_task(task_list)
+    await remind(tomorrow_task)
     
-    tomorrow_task=task_list.apply(select_tomorrow_task,axis=1)
-    # await thread.send(cleaned_tomorrow_task)
-    cleaned_tomorrow_task=tomorrow_task[tomorrow_task.apply(lambda x:x !=[])]
-    await remind(cleaned_tomorrow_task)
-    
-    thirty_minutes_later_task=task_list.apply(select_thirty_minutes_later_task,axis=1)
-    cleaned_thirty_minutes_later_task=thirty_minutes_later_task[thirty_minutes_later_task.apply(lambda x:x !=[])]
-    await remind(cleaned_thirty_minutes_later_task)
+    one_hour_later_task=select_first_time_task(task_list)
+    await remind(one_hour_later_task)
      
     today=datetime.datetime.today()
     sql_delete_done_task=f"""DELETE FROM {task_table} WHERE deadline<'{today}'"""
