@@ -103,7 +103,7 @@ async def remind(data:pandas.DataFrame):
         if mention:
             await thread.send(content=mention+f"[課題](<https://discord.com/channels/{guild.id}/{thread.id}/{message.id}>)を出し忘れていませんか？")
 
-@tasks.loop(seconds=1)
+@tasks.loop(seconds=60)
 async def loop():
     sql_select_task=f"""
         SELECT * FROM {task_table};
