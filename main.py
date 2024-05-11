@@ -113,7 +113,7 @@ async def loop():
     tomorrow_task=select_first_time_task(task_list)
     await remind(tomorrow_task)
     
-    one_hour_later_task=select_first_time_task(task_list)
+    one_hour_later_task=select_second_time_task(task_list)
     await remind(one_hour_later_task)
      
     today=datetime.datetime.today()
