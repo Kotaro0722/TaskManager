@@ -156,7 +156,7 @@ async def on_message(message:discord.Message):
     if is_task_register:
         await register_task(message)    
     
-async def change_task(message_content,message_id):
+async def change_task(message_content,message_id,thread_id):
     try:
         
         today=datetime.date.today()
@@ -169,12 +169,14 @@ async def change_task(message_content,message_id):
         date = datetime.datetime.strptime(
             f"{year}/"+date_str, "%Y/%m/%d %H:%M")
         
-        sql_select_data=f"SELECT * FROM {task_table}"
-        task_list=my_select(sql_select_data)
-        print(task_list)        
-        
-        sql_update_data=f"UPDATE {task_table} SET deadline='{date}' WHERE message_id={message_id}"
-        my_update(dbName,sql_update_data)
+        sql_select_data=f"SELECT * FROM {task_table} WHERE message_id={message_id}"
+        task_list=my_select(dbName,sql_select_data)
+        if task_list.empty:
+            sql_insert_data=f"INSERT INTO {task_table}(message_id,thread_id,deadline) VALUES({message_id},{thread_id},'{date}')"
+            my_update(dbName,sql_insert_data)
+        else:
+            sql_update_data=f"UPDATE {task_table} SET deadline='{date}' WHERE message_id={message_id}"
+            my_update(dbName,sql_update_data)
                 
     except Exception as e:
         print(e) 
@@ -184,10 +186,11 @@ async def change_task(message_content,message_id):
 async def on_raw_message_edit(payload:discord.RawMessageUpdateEvent):
     message_content=payload.data["content"]
     message_id=payload.message_id
+    thread_id=payload.channel_id
     pattern_task_change = r"【.*】\s*\[\d\d?\/\d\d?\s\d\d?:\d\d?]"
     is_task_change = re.fullmatch(pattern_task_change, message_content)
     if is_task_change:
-        await change_task(message_content=message_content,message_id=message_id)
+        await change_task(message_content=message_content,message_id=message_id,thread_id=thread_id)
 
 client.run(token=TOKEN)
 
