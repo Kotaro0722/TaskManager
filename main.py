@@ -154,7 +154,7 @@ async def on_message(message:discord.Message):
     pattern_task_register = r"【.*】\s*\[\d\d?\/\d\d?\s\d\d?:\d\d?]"
     is_task_register = re.fullmatch(pattern_task_register, message.content)
     if is_task_register:
-        await register_task(message)
+        await register_task(message)    
     
 async def change_task(message_content,message_id):
     try:
@@ -168,6 +168,10 @@ async def change_task(message_content,message_id):
         date_str = re.findall(r"\d\d?/\d\d?\s\d\d?:\d\d", message_content)[0]
         date = datetime.datetime.strptime(
             f"{year}/"+date_str, "%Y/%m/%d %H:%M")
+        
+        sql_select_data=f"SELECT * FROM {task_table}"
+        task_list=my_select(sql_select_data)
+        print(task_list)        
         
         sql_update_data=f"UPDATE {task_table} SET deadline='{date}' WHERE message_id={message_id}"
         my_update(dbName,sql_update_data)
