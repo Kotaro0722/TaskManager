@@ -166,9 +166,34 @@ async def on_message(message:discord.Message):
     if is_task_register:
         await register_task(message)
     
-# @client.event
-# async def on_raw_message_edit(payload:discord.RawMessageUpdateEvent):
-#     print(payload.data["content"])
+async def change_task(message_content,message_id):
+    try:
+        
+        today=datetime.date.today()
+        year = today.year
+        date_str = re.findall(r"\d\d?/\d\d?\s\d\d?:\d\d", message_content)[0]
+        temp_date=datetime.datetime.strptime(date_str,"%m/%d %H:%M")
+        if today.month>temp_date.month:
+            year+=1
+        date_str = re.findall(r"\d\d?/\d\d?\s\d\d?:\d\d", message_content)[0]
+        date = datetime.datetime.strptime(
+            f"{year}/"+date_str, "%Y/%m/%d %H:%M")
+        
+        sql_update_data=f"UPDATE {task_table} SET deadline='{date}' WHERE message_id={message_id}"
+        my_update(dbName,sql_update_data)
+                
+    except Exception as e:
+        print(e) 
+        
+    
+@client.event
+async def on_raw_message_edit(payload:discord.RawMessageUpdateEvent):
+    message_content=payload.data["content"]
+    message_id=payload.message_id
+    pattern_task_change = r"【.*】\s*\[\d\d?\/\d\d?\s\d\d?:\d\d?]"
+    is_task_change = re.fullmatch(pattern_task_change, message_content)
+    if is_task_change:
+        await change_task(message_content=message_content,message_id=message_id)
 
 client.run(token=TOKEN)
 
